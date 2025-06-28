@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Data
+data/raw/*
+data/processed/*
+*.csv
+*.parquet
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Docker
+*.log
+*.pid
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
