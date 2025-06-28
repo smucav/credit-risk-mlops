@@ -1,9 +1,17 @@
 # Credit Risk Probability Model for Alternative Data
 
-## Overview
-This project develops an end-to-end credit risk scoring model, enabling a buy-now-pay-later service in partnership with an eCommerce platform. Using alternative data (transactional and behavioral data), the model predicts the probability of customer default, assigns credit scores, and suggests optimal loan amounts and durations. The project leverages RFM (Recency, Frequency, Monetary) metrics to create a proxy for credit risk and follows MLOps practices for reproducibility and deployment.
+## 📌 Overview
+An end-to-end credit risk scoring system for buy-now-pay-later (BNPL) services. Predicts customer default probability using alternative data (transactional/behavioral) and suggests optimal loan terms. Built with MLOps practices for reproducibility.
 
-## 📁 Project Structure
+**Key Features**:
+- 🎯 RFM-based credit risk proxy
+- 🤖 Automated model training/prediction
+- 🚀 FastAPI deployment
+- 🔄 CI/CD integrated
+- 📊 Comprehensive EDA notebooks
+
+
+## 🏗️ Project Structure
 ```
 credit-risk-mlops/
 ├── .github/workflows/ci.yml       # CI/CD pipeline
@@ -28,6 +36,7 @@ credit-risk-mlops/
 ├── .gitignore                   # Git ignore rules
 └── README.md                    # Project documentation
 ```
+
 **Setup**
 
 Clone the repository:
