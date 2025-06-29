@@ -115,7 +115,7 @@ Perform an exploratory analysis of the Xente dataset (`data/raw/data.csv`) to un
   - Computes summary statistics: `Amount` (mean 6,717.85, range -1M to 9.88M), `Value` (mean 9,900.58, range 2 to 9.88M), `FraudResult` (mean 0.002, ~0.2% fraud).
   - Visualizes distributions (highly skewed `Amount` and `Value`), box plots (significant outliers), and categorical frequencies (`ProductCategory`, `ChannelId`).
   - Calculates correlations: `Amount`-`Value` (0.99), `Amount`-`FraudResult` (0.56).
-  - **Key Insights**:
+- **Key Insights**:
     1. **Highly Skewed Numerical Features with Negative Values**: `Amount` and `Value` are right-skewed with negatives (e.g., -1M), suggesting log-transformation after handling debits/credits.
     2. **Dominant Product Categories**: “financial_services” and “airtime” dominate, recommending one-hot encoding with rare category grouping.
     3. **No Missing Data**: All rows are complete, eliminating imputation needs.
