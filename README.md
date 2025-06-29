@@ -121,3 +121,25 @@ Perform an exploratory analysis of the Xente dataset (`data/raw/data.csv`) to un
     3. **No Missing Data**: All rows are complete, eliminating imputation needs.
     4. **Complementary but Highly Correlated Amount and Value**: Correlation of 0.99, with `Value` as absolute size and `Amount` including direction; derive debit/credit flags.
     5. **Significant Outliers**: Extremes from -1M to 9.88M, suggesting capping at 1.5× IQR.
+
+
+## 3: Feature Engineering
+
+#### Objective
+Build a robust, automated, and reproducible data processing script to transform raw data into a model-ready format using an OOP design.
+
+#### Implementation
+- **Script**: `src/data_processing.py`
+  - Uses a `DataProcessor` class with `sklearn.pipeline.Pipeline` to chain transformations.
+  - **Aggregate Features**:
+    - `TotalTransactionAmount`: Sum of `Amount` per `CustomerId`.
+    - `AverageTransactionAmount`: Mean `Amount` per `CustomerId`.
+    - `TransactionCount`: Number of transactions per `CustomerId`.
+    - `StdTransactionAmount`: Standard deviation of `Amount` per `CustomerId`.
+  - **Extracted Features**:
+    - `TransactionHour`, `TransactionDay`, `TransactionMonth`, `TransactionYear` from `TransactionStartTime`.
+  - **Categorical Encoding**:
+    - One-hot encoding for `ProductCategory`, `ChannelId`, `ProviderId`, `ProductId`, `CurrencyCode`.
+  - **Missing Values**: No imputation needed (confirmed in Task 2), but pipeline includes median imputation for robustness.
+  - **Normalization/Standardization**: `StandardScaler` for numerical features (`Amount`, `Value`, etc.).
+  - Saves processed data to `data/processed/processed_data.csv`.
