@@ -102,3 +102,22 @@ However, potential business risks include:
 In a **regulated financial context**, **interpretability often outweighs marginal performance gains**, favoring simpler models unless complex models are **justified with robust explanations**.
 
 ---
+
+## 2: Exploratory Data Analysis (EDA)
+
+#### Objective
+Perform an exploratory analysis of the Xente dataset (`data/raw/data.csv`) to understand its structure, distributions, correlations, missing values, and outliers, providing insights for feature engineering.
+
+#### Implementation
+- **Notebook**: `notebooks/1.0-eda.ipynb`
+  - Loads the dataset with 95,662 rows and 16 columns.
+  - Analyzes data types (11 object, 4 int64, 1 float64) and confirms no missing values.
+  - Computes summary statistics: `Amount` (mean 6,717.85, range -1M to 9.88M), `Value` (mean 9,900.58, range 2 to 9.88M), `FraudResult` (mean 0.002, ~0.2% fraud).
+  - Visualizes distributions (highly skewed `Amount` and `Value`), box plots (significant outliers), and categorical frequencies (`ProductCategory`, `ChannelId`).
+  - Calculates correlations: `Amount`-`Value` (0.99), `Amount`-`FraudResult` (0.56).
+  - **Key Insights**:
+    1. **Highly Skewed Numerical Features with Negative Values**: `Amount` and `Value` are right-skewed with negatives (e.g., -1M), suggesting log-transformation after handling debits/credits.
+    2. **Dominant Product Categories**: “financial_services” and “airtime” dominate, recommending one-hot encoding with rare category grouping.
+    3. **No Missing Data**: All rows are complete, eliminating imputation needs.
+    4. **Complementary but Highly Correlated Amount and Value**: Correlation of 0.99, with `Value` as absolute size and `Amount` including direction; derive debit/credit flags.
+    5. **Significant Outliers**: Extremes from -1M to 9.88M, suggesting capping at 1.5× IQR.
