@@ -143,3 +143,49 @@ Build a robust, automated, and reproducible data processing script to transform 
   - **Missing Values**: No imputation needed (confirmed in Task 2), but pipeline includes median imputation for robustness.
   - **Normalization/Standardization**: `StandardScaler` for numerical features (`Amount`, `Value`, etc.).
   - Saves processed data to `data/processed/processed_data.csv`.
+
+
+## 4 - Proxy Target Variable Engineering
+
+### 📝 Description
+Since no pre-existing `"credit risk"` column exists in the dataset, a **proxy target variable** `is_high_risk` was engineered in `src/target_engineering.py` to identify **disengaged customers** as high-risk proxies. The process included:
+
+---
+
+### 📊 RFM Metrics
+- **Recency**: Days since the last transaction (calculated using snapshot date **June 30, 2025**).
+- **Frequency**: Total number of transactions per `CustomerId`.
+- **Monetary**: Total transaction value per `CustomerId`.
+
+These were derived from the raw data using groupby-aggregation.
+
+---
+
+### 📈 Clustering
+- Applied **K-Means clustering** on the **scaled RFM features**
+- Parameters: `n_clusters=3`, `random_state=42`
+- Cluster centers were analyzed to segment customers into behavioral groups.
+
+---
+
+### 🚨 High-Risk Label Assignment
+- Calculated an **engagement score** using:
+  `engagement = Frequency + |Monetary|`
+- The cluster with the **lowest engagement** (i.e., high Recency, low Frequency, low Monetary) was labeled as **high risk**.
+- Assigned:
+  - `is_high_risk = 1` for customers in the least engaged cluster
+  - `is_high_risk = 0` for others
+
+---
+
+### 🔗 Integration
+- Merged `is_high_risk` back into the original processed dataset using `CustomerId`
+- Saved the updated dataset as:
+  `data/processed/processed_data_with_target.csv`
+
+---
+
+### 📁 Output
+- Final dataset includes:
+  - All **55 features** from Task 3
+  - Plus the **new binary target column**: `is_high_risk`
