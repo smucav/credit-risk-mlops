@@ -60,7 +60,7 @@ class AggregateFeatureExtractor:
 class DataProcessor:
     """Class to manage data processing pipeline and execution."""
 
-    def __init__(self, raw_path="data/raw/data.csv", processed_path="../data/processed/processed_data.csv"):
+    def __init__(self, raw_path="data/raw/data.csv", processed_path="data/processed/processed_data.csv"):
         """Initialize with file paths."""
         self.raw_path = raw_path
         self.processed_path = processed_path
