@@ -23,6 +23,7 @@ credit-risk-mlops/
 ├── src/                         # Production code
 │   ├── __init__.py
 │   ├── data_processing.py       # Feature engineering
+|   ├── target_engineering.py  # Proxy target variable engineering
 │   ├── train.py                # Model training
 │   ├── predict.py              # Inference
 │   └── api/
