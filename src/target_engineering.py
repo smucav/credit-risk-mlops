@@ -49,6 +49,8 @@ rfm_data = raw_df.groupby('CustomerId').agg({
 # Handle potential missing values or zeros in Frequency and Monetary
 rfm_data['Frequency'] = rfm_data['Frequency'].replace(0, 1)  # Avoid division by zero
 rfm_data['Monetary'] = rfm_data['Monetary'].replace(0, 0.01)  # Small non-zero value
+percentile_99 = rfm_data['Monetary'].quantile(0.99)
+rfm_data['Monetary'] = rfm_data['Monetary'].clip(lower=-percentile_99, upper=percentile_99) # cap or remove extreme Monetary values
 
 # Pre-process RFM features
 scaler = StandardScaler()
