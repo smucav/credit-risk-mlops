@@ -20,7 +20,12 @@ class TimeFeatureExtractor:
         X["TransactionMonth"] = X["TransactionStartTime"].dt.month
         X["TransactionYear"] = X["TransactionStartTime"].dt.year
         return X[
-            ["TransactionHour", "TransactionDay", "TransactionMonth", "TransactionYear"]
+            [
+                "TransactionHour",
+                "TransactionDay",
+                "TransactionMonth",
+                "TransactionYear",
+            ]
         ]
 
     def validate_time_range(self, X):
@@ -125,12 +130,17 @@ class DataProcessor:
 
         categorical_transformer = Pipeline(
             steps=[
-                ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
+                (
+                    "imputer",
+                    SimpleImputer(strategy="constant", fill_value="missing"),
+                ),
                 ("onehot", OneHotEncoder(drop="first", sparse_output=False)),
             ]
         )
 
-        time_transformer = Pipeline(steps=[("time_extractor", TimeFeatureExtractor())])
+        time_transformer = Pipeline(
+            steps=[("time_extractor", TimeFeatureExtractor())]
+        )
 
         agg_transformer = Pipeline(
             steps=[("agg_extractor", AggregateFeatureExtractor())]
@@ -152,7 +162,9 @@ class DataProcessor:
         df = self._load_data()
         processed_data = self.pipeline.fit_transform(df)
         n_features = processed_data.shape[1]
-        column_names = self.pipeline.named_steps["preprocessor"].get_feature_names_out()
+        column_names = self.pipeline.named_steps[
+            "preprocessor"
+        ].get_feature_names_out()
 
         if len(column_names) != n_features:
             raise ValueError(

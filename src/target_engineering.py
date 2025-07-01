@@ -39,7 +39,9 @@ rfm_data = (
     raw_df.groupby("CustomerId")
     .agg(
         {
-            "TransactionStartTime": lambda x: (snapshot_date - x.max()).days,  # Recency
+            "TransactionStartTime": lambda x: (
+                snapshot_date - x.max()
+            ).days,  # Recency
             "TransactionId": "count",  # Frequency
             "Amount": "sum",  # Monetary
         }
@@ -54,8 +56,12 @@ rfm_data = (
 )
 
 # Handle potential missing values or zeros in Frequency and Monetary
-rfm_data["Frequency"] = rfm_data["Frequency"].replace(0, 1)  # Avoid division by zero
-rfm_data["Monetary"] = rfm_data["Monetary"].replace(0, 0.01)  # Small non-zero value
+rfm_data["Frequency"] = rfm_data["Frequency"].replace(
+    0, 1
+)  # Avoid division by zero
+rfm_data["Monetary"] = rfm_data["Monetary"].replace(
+    0, 0.01
+)  # Small non-zero value
 percentile_99 = rfm_data["Monetary"].quantile(0.99)
 rfm_data["Monetary"] = rfm_data["Monetary"].clip(
     lower=-percentile_99, upper=percentile_99
@@ -88,7 +94,9 @@ high_risk_cluster = (
 )  # Highest score indicates lowest engagement
 
 # Create is_high_risk column
-rfm_data["is_high_risk"] = (rfm_data["Cluster"] == high_risk_cluster).astype(int)
+rfm_data["is_high_risk"] = (rfm_data["Cluster"] == high_risk_cluster).astype(
+    int
+)
 
 # Merge is_high_risk to raw data on CustomerId
 raw_df = raw_df.merge(rfm_data[["is_high_risk"]], on="CustomerId", how="left")

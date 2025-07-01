@@ -9,7 +9,12 @@ from src.data_processing import TimeFeatureExtractor
 def test_validate_time_range_valid():
     """Test validate_time_range with valid time data."""
     data = pd.DataFrame(
-        {"TransactionStartTime": ["2023-01-01 10:00:00", "2023-01-15 15:30:00"]}
+        {
+            "TransactionStartTime": [
+                "2023-01-01 10:00:00",
+                "2023-01-15 15:30:00",
+            ]
+        }
     )
     extractor = TimeFeatureExtractor()
     assert extractor.validate_time_range(data) is True

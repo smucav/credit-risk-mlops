@@ -19,7 +19,8 @@ logger.info("MLflow tracking URI set to http://127.0.0.1:5000")
 try:
     model = mlflow.sklearn.load_model("models:/Credit_Risk_Model/4")
     logger.info(
-        "Model loaded from MLflow Registry " "(version 4) as scikit-learn model"
+        "Model loaded from MLflow Registry "
+        "(version 4) as scikit-learn model"
     )
 except Exception as e:
     logger.error(f"Failed to load model: {e}")
@@ -35,7 +36,12 @@ async def read_root():
 async def predict(customer_data: CustomerData):
     # Convert Pydantic model to numpy array
     data = np.array(
-        [[getattr(customer_data, field) for field in customer_data.__fields__.keys()]]
+        [
+            [
+                getattr(customer_data, field)
+                for field in customer_data.__fields__.keys()
+            ]
+        ]
     )
     # Get prediction probability
     try:
