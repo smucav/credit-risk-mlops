@@ -85,7 +85,8 @@ cluster_centers = pd.DataFrame(
 )
 cluster_sizes = rfm_data["Cluster"].value_counts()
 
-# Custom metric for high-risk: inverse of (Frequency + |Monetary|) to prioritize low engagement
+# Custom metric for high-risk: inverse of (Frequency + |Monetary|)
+# to prioritize low engagement
 engagement_score = 1 / (
     cluster_centers["Frequency"] + cluster_centers["Monetary"].abs()
 )

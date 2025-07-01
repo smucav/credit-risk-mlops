@@ -168,7 +168,8 @@ class DataProcessor:
 
         if len(column_names) != n_features:
             raise ValueError(
-                f"Feature name count ({len(column_names)}) does not match transformed data shape ({n_features})"
+                f"Feature name count ({len(column_names)}) does not match "
+                f"transformed data shape ({n_features})"
             )
 
         processed_df = pd.DataFrame(processed_data, columns=column_names)

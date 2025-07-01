@@ -1,11 +1,12 @@
-import pandas as pd
-import sys
 import os
+import sys
+from pathlib import Path
+import pandas as pd
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# Add project directory to Python path at the very start
+sys.path.append(str(Path(__file__).parent.parent))
+
 from src.data_processing import TimeFeatureExtractor
-
-
 def test_validate_time_range_valid():
     """Test validate_time_range with valid time data."""
     data = pd.DataFrame(

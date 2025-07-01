@@ -50,7 +50,8 @@ async def predict(customer_data: CustomerData):
         ]  # Probability of high risk (class 1)
         is_high_risk = probability > 0.5  # Threshold for binary classification
         logger.info(
-            f"Prediction made: probability={probability}, is_high_risk={is_high_risk}"
+            "Prediction made: "
+            f"probability={probability}, is_high_risk={is_high_risk}"
         )
         return PredictionResponse(
             risk_probability=probability, is_high_risk=is_high_risk
