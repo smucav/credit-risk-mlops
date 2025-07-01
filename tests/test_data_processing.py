@@ -1,11 +1,7 @@
 import sys
 from pathlib import Path
 import pandas as pd
-
-# Add project directory to Python path at the very start
-sys.path.append(str(Path(__file__).parent.parent))
-
-from src.data_processing import TimeFeatureExtractor
+from src.data_processing import TimeFeatureExtractor  # Now top-level ✅
 
 
 def test_validate_time_range_valid():
@@ -36,5 +32,8 @@ def test_validate_time_range_invalid_hour():
 
 
 if __name__ == "__main__":
+    # Modify sys.path only when running as script
+    sys.path.append(str(Path(__file__).parent.parent))
+
     test_validate_time_range_valid()
     test_validate_time_range_invalid_hour()
