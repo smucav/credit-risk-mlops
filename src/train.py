@@ -9,10 +9,23 @@ import mlflow
 import mlflow.sklearn
 import os
 import logging
+from mlflow.pyfunc import PythonModel, PythonModelContext
+from typing import Any
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Define PythonModel for PyFunc
+class SklearnModelWrapper(PythonModel):
+    def __init__(self, model):
+        self.model = model
+
+    def predict(self, context: PythonModelContext, model_input: np.ndarray) -> np.ndarray:
+        return self.model.predict(model_input)
+
+    def predict_proba(self, context: PythonModelContext, model_input: np.ndarray) -> np.ndarray:
+        return self.model.predict_proba(model_input)
 
 # Load data
 data_path = "data/processed/processed_data_with_target.csv"
@@ -57,7 +70,7 @@ with mlflow.start_run(run_name="Logistic_Regression") as run:
     grid_search_lr.fit(X_train, y_train)
     best_lr = grid_search_lr.best_estimator_
     y_pred_lr = best_lr.predict(X_test)
-    
+
     # Evaluate
     metrics = {
         'accuracy': accuracy_score(y_test, y_pred_lr),
@@ -69,7 +82,7 @@ with mlflow.start_run(run_name="Logistic_Regression") as run:
     logger.info(f"Logistic Regression Metrics: {metrics}")
     mlflow.log_params(grid_search_lr.best_params_)
     mlflow.log_metrics(metrics)
-    mlflow.sklearn.log_model(best_lr, "model")
+    mlflow.sklearn.log_model(best_lr, "model", input_example=X_train[:1], signature=mlflow.models.signature.infer_signature(X_train, y_train))
     lr_run_id = run.info.run_id
 
 # Model 2: Random Forest
@@ -97,7 +110,8 @@ with mlflow.start_run(run_name="Random_Forest") as run:
     logger.info(f"Random Forest Metrics: {metrics}")
     mlflow.log_params(grid_search_rf.best_params_)
     mlflow.log_metrics(metrics)
-    mlflow.sklearn.log_model(best_rf, "model")
+    mlflow.sklearn.log_model(best_rf, "model", input_example=X_train[:1], signature=mlflow.models.signature.infer_signature(X_train, y_train))
+    mlflow.pyfunc.log_model("pyfunc_model", python_model=SklearnModelWrapper(best_rf), input_example=X_train[:1], signature=mlflow.models.signature.infer_signature(X_train, y_train))
     rf_run_id = run.info.run_id
 
 # Register the best model (compare F1 score)
@@ -109,7 +123,7 @@ else:
     best_run_id = rf_run_id
 
 with mlflow.start_run(run_id=best_run_id):
-    mlflow.sklearn.log_model(best_model, "best_model")
+    mlflow.sklearn.log_model(best_model, "best_model", input_example=X_train[:1], signature=mlflow.models.signature.infer_signature(X_train, y_train))
     model_info = mlflow.register_model(
         f"runs:/{best_run_id}/best_model",
         "Credit_Risk_Model"
