@@ -22,6 +22,15 @@ class TimeFeatureExtractor:
         X['TransactionYear'] = X['TransactionStartTime'].dt.year
         return X[['TransactionHour', 'TransactionDay', 'TransactionMonth', 'TransactionYear']]
 
+    def validate_time_range(self, X):
+        """Validate that extracted time features are within expected ranges."""
+        X_transformed = self.transform(X)
+        if not (0 <= X_transformed['TransactionHour'].min() <= 23):
+            raise ValueError("TransactionHour out of range [0, 23]")
+        if not (1 <= X_transformed['TransactionDay'].min() <= 31):
+            raise ValueError("TransactionDay out of range [1, 31]")
+        return True
+
     def get_feature_names_out(self, input_features=None):
         return ['TransactionHour', 'TransactionDay', 'TransactionMonth', 'TransactionYear']
 
