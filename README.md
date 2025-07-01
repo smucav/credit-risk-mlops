@@ -10,6 +10,7 @@ An end-to-end credit risk scoring system for buy-now-pay-later (BNPL) services. 
 - 🔄 CI/CD integrated
 - 📊 Comprehensive EDA notebooks
 
+---
 
 ## 🏗️ Project Structure
 ```
@@ -23,7 +24,7 @@ credit-risk-mlops/
 ├── src/                         # Production code
 │   ├── __init__.py
 │   ├── data_processing.py       # Feature engineering
-|   ├── target_engineering.py  # Proxy target variable engineering
+|   ├── target_engineering.py    # Proxy target variable engineering
 │   ├── train.py                # Model training
 │   ├── predict.py              # Inference
 │   └── api/
@@ -38,23 +39,26 @@ credit-risk-mlops/
 └── README.md                    # Project documentation
 ```
 
-**Setup**
+---
+
+## 🛠️ Setup
 
 Clone the repository:
-	```bash
-	git clone https://github.com/smucav/credit-risk-mlops.git
-	cd credit-risk-mlops
-	```
-
+```bash
+git clone https://github.com/smucav/credit-risk-mlops.git
+cd credit-risk-mlops
+```
 
 Create a virtual environment and install dependencies:
-	```bash
-	python -m venv venv
-	source venv/bin/activate  # On Windows: venv\Scripts\activate
-	pip install -r requirements.txt
-	```
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-##  Credit Scoring Business Understanding
+---
+
+## 1️⃣ Credit Scoring Business Understanding
 
 ### 1. How does the Basel II Accord’s emphasis on risk measurement influence our need for an interpretable and well-documented model?
 
@@ -104,7 +108,7 @@ In a **regulated financial context**, **interpretability often outweighs margina
 
 ---
 
-## 2: Exploratory Data Analysis (EDA)
+## 2️⃣ Exploratory Data Analysis (EDA)
 
 #### Objective
 Perform an exploratory analysis of the Xente dataset (`data/raw/data.csv`) to understand its structure, distributions, correlations, missing values, and outliers, providing insights for feature engineering.
@@ -123,8 +127,9 @@ Perform an exploratory analysis of the Xente dataset (`data/raw/data.csv`) to un
     4. **Complementary but Highly Correlated Amount and Value**: Correlation of 0.99, with `Value` as absolute size and `Amount` including direction; derive debit/credit flags.
     5. **Significant Outliers**: Extremes from -1M to 9.88M, suggesting capping at 1.5× IQR.
 
+---
 
-## 3: Feature Engineering
+## 3️⃣ Feature Engineering
 
 #### Objective
 Build a robust, automated, and reproducible data processing script to transform raw data into a model-ready format using an OOP design.
@@ -145,8 +150,9 @@ Build a robust, automated, and reproducible data processing script to transform 
   - **Normalization/Standardization**: `StandardScaler` for numerical features (`Amount`, `Value`, etc.).
   - Saves processed data to `data/processed/processed_data.csv`.
 
+---
 
-## 4 - Proxy Target Variable Engineering
+## 4️⃣ Proxy Target Variable Engineering
 
 ### 📝 Description
 Since no pre-existing `"credit risk"` column exists in the dataset, a **proxy target variable** `is_high_risk` was engineered in `src/target_engineering.py` to identify **disengaged customers** as high-risk proxies. The process included:
@@ -191,7 +197,9 @@ These were derived from the raw data using groupby-aggregation.
   - All **55 features** from Task 3
   - Plus the **new binary target column**: `is_high_risk`
 
-## 5 - Model Training and Tracking
+---
+
+## 5️⃣ Model Training and Tracking
 
 This task focuses on developing a structured model training process, including experiment tracking, model versioning, and unit testing, using **MLflow** for experiment management and **pytest** for testing.
 
@@ -268,7 +276,6 @@ Used **GridSearchCV** with 5-fold cross-validation, optimizing for **F1 score**.
 ---
 
 ### ✅ Unit Testing
-
 - Added tests in `tests/test_data_processing.py`
 - Tested the `validate_time_range` helper function in `src/data_processing.py`
 - Ensures correct time feature extraction and input validation
@@ -298,13 +305,144 @@ python src/train.py
 ```bash
 pytest tests/test_data_processing.py
 ```
+
 ---
 
 ### 📌 Results Summary
-
 - **Random Forest** model significantly outperformed Logistic Regression.
 - Achieved **F1 score of 0.9516** and **ROC-AUC of 0.9984**
 - All experiments are **tracked in MLflow**, enabling reproducibility and versioning.
 - Model registered in the **Model Registry** for deployment.
+
+---
+
+## 6️⃣ Credit Risk Prediction API
+
+This task documents the development and deployment of a **Credit Risk Prediction API** using **FastAPI**, containerized with **Docker**, and integrated with **MLflow** for model tracking and management. It leverages a **Random Forest Classifier** (version 4 of `Credit_Risk_Model`) trained on financial data to predict the probability of high-risk credit behavior.
+
+---
+
+### 🔧 Implementation Details
+
+#### 📦 Dependencies
+- FastAPI, Docker, MLflow, and scikit-learn listed in `requirements.txt` for API development, containerization, and model management.
+
+#### 🤖 Model
+- **Random Forest Classifier** (version 4 of `Credit_Risk_Model`) registered in MLflow.
+- Loaded using MLflow’s PyFunc flavor for flexible predictions.
+
+#### 🌐 API Framework
+- Built with **FastAPI** for high-performance REST endpoints.
+- **Endpoint**: `/predict` (POST) returns risk probability and binary classification (`is_high_risk`).
+
+#### 📦 Deployment
+- Containerized with **Docker** for consistent deployment across environments.
+- Configured with `network_mode: host` to connect to the MLflow server.
+
+---
+
+### ✨ Features
+- 🛠️ **Model Training & Registration**: Trains and registers a credit risk model using scikit-learn and MLflow.
+- 🌐 **REST API**: Serves predictions via a fast and scalable REST endpoint.
+- 📦 **Dockerized Deployment**: Ensures consistent deployment with Docker.
+- 🔄 **Flexible Model Loading**: Supports MLflow's PyFunc flavor for seamless model integration.
+
+---
+
+### 📋 Prerequisites
+- **Python 3.10**: Required for running the application.
+- **Docker**: Install Docker and Docker Compose for containerization.
+- **MLflow**: Install via `pip install mlflow` and run the tracking server.
+- **Git**: For version control and pushing to GitHub.
+
+---
+
+### 🛠️ Installation
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/smucav/credit-risk-mlops.git
+cd credit-risk-mlops
+```
+
+#### 2. Set Up the Virtual Environment
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+#### 3. Start the MLflow Tracking Server
+Run the MLflow server on your host machine:
+```bash
+mlflow server --host 0.0.0.0 --port 5000
+```
+📍 Access the MLflow UI at [http://127.0.0.1:5000](http://127.0.0.1:5000).  
+*Ensure the server is running before starting the API.*
+
+#### 4. Train and Register the Model
+Run the training script to generate and register the model:
+```bash
+python src/train.py
+```
+✅ This registers version 4 of `Credit_Risk_Model` in MLflow.
+
+#### 5. Build and Run the Docker Container
+Use Docker Compose to build and start the API:
+```bash
+sudo docker-compose up --build
+```
+🌐 The API will be available at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+---
+
+### 🚀 Usage
+
+#### Test the Prediction Endpoint
+Send a POST request with sample data (`sample.json`) using `curl`:
+```bash
+curl -X POST "http://127.0.0.1:8000/predict" -H "Content-Type: application/json" -d @sample.json
+```
+
+**Expected Output**:
+```json
+{
+  "risk_probability": 0.025,
+  "is_high_risk": false
+}
+```
+
+**Sample JSON (`sample.json`)**:
+```json
+{
+  "num__Amount": -0.046371,
+  "time__TransactionHour": 12,
+  "agg__StdTransactionAmount": 0.0,
+  "agg__MeanTransactionAmount": -0.015456,
+  "agg__MedianTransactionAmount": -0.023789,
+  "agg__MinTransactionAmount": -0.078901,
+  "agg__MaxTransactionAmount": 0.045678,
+  "agg__TransactionCount": 50,
+  "cat__TransactionType_1": 1,
+  "cat__TransactionType_2": 0,
+  "cat__TransactionType_3": 0
+}
+```
+
+#### Stop the Container
+```bash
+sudo docker-compose down
+```
+
+---
+
+### 📂 Project Structure (Task 6)
+- **`Dockerfile`**: Defines the Docker image for the API.
+- **`docker-compose.yml`**: Configures the Docker container with `network_mode: host` for MLflow server connectivity.
+- **`src/api/main.py`**: FastAPI application that loads the MLflow model and serves the `/predict` endpoint.
+- **`src/api/pydantic_models.py`**: Pydantic models for input (`CustomerData`) and output (`PredictionResponse`).
+- **`src/train.py`**: Script to train, evaluate, and register the model with MLflow.
+- **`requirements.txt`**: Lists Python dependencies.
+- **`sample.json`**: Example input data for testing.
 
 ---
