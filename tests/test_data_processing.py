@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 import pandas as pd
@@ -7,6 +6,8 @@ import pandas as pd
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.data_processing import TimeFeatureExtractor
+
+
 def test_validate_time_range_valid():
     """Test validate_time_range with valid time data."""
     data = pd.DataFrame(
