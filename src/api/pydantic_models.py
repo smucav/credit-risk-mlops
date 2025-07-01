@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-import numpy as np
+
 
 class CustomerData(BaseModel):
     num__Amount: float
@@ -53,6 +53,7 @@ class CustomerData(BaseModel):
     agg__AverageTransactionAmount: float
     agg__TransactionCount: float
     agg__StdTransactionAmount: float
+
 
 class PredictionResponse(BaseModel):
     risk_probability: float
