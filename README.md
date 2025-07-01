@@ -190,3 +190,121 @@ These were derived from the raw data using groupby-aggregation.
 - Final dataset includes:
   - All **55 features** from Task 3
   - Plus the **new binary target column**: `is_high_risk`
+
+## 5 - Model Training and Tracking
+
+This task focuses on developing a structured model training process, including experiment tracking, model versioning, and unit testing, using **MLflow** for experiment management and **pytest** for testing.
+
+---
+
+### 🔧 Implementation Details
+
+#### 📦 Dependencies
+- Added `mlflow` and `pytest` to `requirements.txt` to support:
+  - Experiment tracking
+  - Unit testing
+
+#### 📊 Data Preparation
+- Used `data/processed/processed_data_with_target.csv`
+- Dataset was split into **training (80%)** and **testing (20%)** sets.
+- Dropped non-numeric columns:
+  - `remainder__TransactionId`, `remainder__BatchId`, `remainder__AccountId`, `remainder__SubscriptionId`
+- Missing values in `agg__StdTransactionAmount` were imputed with **0**.
+
+---
+
+### 🤖 Model Selection and Training
+
+#### Models Trained:
+- Logistic Regression
+- Random Forest
+
+#### ⚙️ Hyperparameter Tuning:
+Used **GridSearchCV** with 5-fold cross-validation, optimizing for **F1 score**.
+
+- **Logistic Regression**:
+  - `C`: [0.01, 0.1, 1.0, 10.0]
+
+- **Random Forest**:
+  - `n_estimators`: [100, 200]
+  - `max_depth`: [10, 20, None]
+  - `min_samples_split`: [2, 5]
+
+---
+
+### 📈 Model Evaluation
+
+**Metrics Tracked**:
+- Accuracy
+- Precision
+- Recall
+- F1 Score
+- ROC-AUC
+
+#### 🔹 Logistic Regression Results:
+- Accuracy: **0.9231**
+- Precision: **0.6876**
+- Recall: **0.4787**
+- F1 Score: **0.5644**
+- ROC-AUC: **0.9363**
+
+#### 🔹 Random Forest Results:
+- Accuracy: **0.9900**
+- Precision: **0.9611**
+- Recall: **0.9422**
+- F1 Score: **0.9516**
+- ROC-AUC: **0.9984**
+
+---
+
+### 🧪 Experiment Tracking with MLflow
+- Parameters, metrics, and models were logged via **MLflow**.
+- Tracking URI set to: [http://127.0.0.1:5000](http://127.0.0.1:5000)
+
+#### ✅ Model Registration:
+- The best-performing model (Random Forest with F1 = 0.9516) was registered as:
+  - **Version 2** of `"Credit_Risk_Model"` in the **MLflow Model Registry**
+
+---
+
+### ✅ Unit Testing
+
+- Added tests in `tests/test_data_processing.py`
+- Tested the `validate_time_range` helper function in `src/data_processing.py`
+- Ensures correct time feature extraction and input validation
+
+---
+
+### ▶️ How to Run
+
+#### 📥 Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+#### 🚀 Start MLflow Tracking UI
+```bash
+mlflow ui
+```
+- Run in a separate terminal
+- Accessible at: [http://127.0.0.1:5000](http://127.0.0.1:5000)
+
+#### 🤖 Train Models
+```bash
+python src/train.py
+```
+
+#### 🧪 Run Tests
+```bash
+pytest tests/test_data_processing.py
+```
+---
+
+### 📌 Results Summary
+
+- **Random Forest** model significantly outperformed Logistic Regression.
+- Achieved **F1 score of 0.9516** and **ROC-AUC of 0.9984**
+- All experiments are **tracked in MLflow**, enabling reproducibility and versioning.
+- Model registered in the **Model Registry** for deployment.
+
+---
