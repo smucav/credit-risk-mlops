@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+      - task-6
+  pull_request:
+    branches:
+      - main
+      - task-6
 
 jobs:
   lint-and-test:
@@ -26,6 +31,13 @@ jobs:
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+
+      - name: Check dataset presence
+        run: |
+          if [ ! -f "data/processed/processed_data_with_target.csv" ]; then
+            echo "Error: Dataset file not found!"
+            exit 1
+          fi
 
       - name: Run linter (flake8)
         run: |
