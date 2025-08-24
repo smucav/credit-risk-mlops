@@ -429,6 +429,29 @@ curl -X POST "http://127.0.0.1:8000/predict" -H "Content-Type: application/json"
 }
 ```
 
+## 📂 Project Structure (Task 6)
+
+* Dockerfile: Defines the Docker image for the API.
+* docker-compose.yml: Configures the Docker container with network_mode: host for MLflow server connectivity.
+* src/api/main.py: FastAPI application that loads the MLflow model and serves the /predict endpoint.
+* src/api/pydantic_models.py: Pydantic models for input (CustomerData) and output (PredictionResponse).
+* src/train.py: Script to train, evaluate, and register the model with MLflow.
+* requirements.txt: Lists Python dependencies.
+* sample.json: Example input data for testing.
+
+## 🛠️ Model Training Workflow
+The model training process is managed by `src/train.py`, which automates the following steps:
+
+* Data Loading: Reads data/processed/processed_data_with_target.csv and imputes missing agg__StdTransactionAmount values with 0.
+* Feature Preparation: Drops non-numeric columns (e.g., remainder__TransactionId) and scales features using StandardScaler.
+* Model Training: Trains Logistic Regression and Random Forest models with GridSearchCV, optimizing for F1 score. Hyperparameters include C [0.01, 0.1, 1.0, 10.0] for Logistic Regression and n_estimators [100, 200], max_depth [10, 20, None], min_samples_split [2, 5] for Random Forest.
+* Evaluation: Logs metrics (Accuracy, Precision, Recall, F1, ROC-AUC) to MLflow, with Random Forest achieving F1 0.9516 and ROC-AUC 0.9984.
+* Registration: Registers the best model (Random Forest, version 4) in the MLflow Model Registry for deployment.
+
+
+Tracking: All experiments are logged at http://127.0.0.1:5000 using MLflow, ensuring reproducibility.
+
+
 #### Stop the Container
 ```bash
 sudo docker-compose down

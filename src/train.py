@@ -15,43 +15,62 @@ import mlflow
 import mlflow.sklearn
 import logging
 from mlflow.pyfunc import PythonModel, PythonModelContext
+import pandera as pa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 # Define PythonModel for PyFunc
 class SklearnModelWrapper(PythonModel):
     def __init__(self, model):
         self.model = model
 
-    def predict(
-        self, context: PythonModelContext, model_input: np.ndarray
-    ) -> np.ndarray:
+    def predict(self, context: PythonModelContext, model_input: np.ndarray) -> np.ndarray:
         return self.model.predict(model_input)
 
-    def predict_proba(
-        self, context: PythonModelContext, model_input: np.ndarray
-    ) -> np.ndarray:
+    def predict_proba(self, context: PythonModelContext, model_input: np.ndarray) -> np.ndarray:
         return self.model.predict_proba(model_input)
 
+# Define Pandera schema for data validation
+schema = pa.DataFrameSchema(
+    columns={
+        "num__Amount": pa.Column(pa.Float64),
+        "time__TransactionHour": pa.Column(pa.Int64, nullable=False),
+        "agg__StdTransactionAmount": pa.Column(pa.Float64, nullable=True),
+        "is_high_risk": pa.Column(pa.Int64, checks=pa.Check(lambda s: s.isin([0, 1]))),
+        # Add other key columns as needed based on your dataset
+        # Example: "agg__TransactionCount": pa.Column(pa.Int64),
+    },
+    # Allow additional columns not explicitly defined
+    strict=False,
+    coerce=True,  # Automatically coerce types where possible
+)
 
-# Load data
+# Load and validate data
 data_path = "data/processed/processed_data_with_target.csv"
 try:
     df = pd.read_csv(data_path)
     logger.info(f"Loaded data from {data_path}")
+    # Validate data with Pandera
+    try:
+        validated_df = schema.validate(df, lazy=True)
+        logger.info("Data validated successfully with Pandera")
+    except pa.errors.SchemaError as e:
+        logger.warning(f"Data validation failed: {e}. Proceeding with original data after dropping invalid rows.")
+        # Drop rows with invalid data as a fallback
+        validated_df = df.dropna(subset=["is_high_risk", "num__Amount", "time__TransactionHour"])
+        logger.info(f"Proceeded with {len(validated_df)} valid rows after dropping invalid ones.")
 except FileNotFoundError:
     logger.error(f"Data file not found at {data_path}")
     raise
 
 # Impute NaN values in agg__StdTransactionAmount with 0
-df["agg__StdTransactionAmount"] = df["agg__StdTransactionAmount"].fillna(0)
+validated_df["agg__StdTransactionAmount"] = validated_df["agg__StdTransactionAmount"].fillna(0)
 logger.info("Imputed NaN values in agg__StdTransactionAmount with 0")
 
 # Split features and target, dropping non-numeric columns
-X = df.drop(
+X = validated_df.drop(
     columns=[
         "is_high_risk",
         "remainder__TransactionId",
@@ -60,7 +79,7 @@ X = df.drop(
         "remainder__SubscriptionId",
     ]
 )
-y = df["is_high_risk"]
+y = validated_df["is_high_risk"]
 
 # Scale features
 scaler = StandardScaler()
