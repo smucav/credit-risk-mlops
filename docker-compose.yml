@@ -1,9 +1,11 @@
 version: '3.8'
 services:
-  api:
+  credit-api:
     build: .
-    network_mode: host
+    ports:
+      - "8000:8000"
     volumes:
       - .:/app
     environment:
-      - MLFLOW_TRACKING_URI=http://127.0.0.1:5000
+      - PYTHONPATH=/app
+      - MLFLOW_TRACKING_URI=file:./mlruns
