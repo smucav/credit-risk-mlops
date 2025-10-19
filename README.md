@@ -1,9 +1,11 @@
 # Credit Risk Probability Model for Alternative Data
 
 ## 📌 Overview
+
 An end-to-end credit risk scoring system for buy-now-pay-later (BNPL) services. Predicts customer default probability using alternative data (transactional/behavioral) and suggests optimal loan terms. Built with MLOps practices for reproducibility.
 
 **Key Features**:
+
 - 🎯 RFM-based credit risk proxy
 - 🤖 Automated model training/prediction
 - 🚀 FastAPI deployment
@@ -13,6 +15,7 @@ An end-to-end credit risk scoring system for buy-now-pay-later (BNPL) services. 
 ---
 
 ## 🏗️ Project Structure
+
 ```
 credit-risk-mlops/
 ├── .github/workflows/ci.yml       # CI/CD pipeline
@@ -44,12 +47,14 @@ credit-risk-mlops/
 ## 🛠️ Setup
 
 Clone the repository:
+
 ```bash
 git clone https://github.com/smucav/credit-risk-mlops.git
 cd credit-risk-mlops
 ```
 
 Create a virtual environment and install dependencies:
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -85,21 +90,25 @@ However, potential business risks include:
 #### ✅ Simple Models (e.g., Logistic Regression with WoE)
 
 **Advantages:**
+
 - Highly **interpretable**, as coefficients directly show feature impacts.
 - Aligns with Basel II’s **transparency requirements**, making it easier to explain to regulators and stakeholders.
 - **Computationally efficient** and suitable for smaller datasets.
 
 **Disadvantages:**
+
 - May **underperform** on complex, non-linear patterns in alternative data.
 - Lower predictive accuracy in some cases.
 
 #### ⚡ Complex Models (e.g., Gradient Boosting)
 
 **Advantages:**
+
 - Capture **intricate patterns** in data, potentially improving accuracy.
 - Handle **non-linear relationships** in RFM features effectively.
 
 **Disadvantages:**
+
 - Less interpretable — feature importance is harder to explain.
 - Raises **regulatory concerns** under Basel II, requiring additional explanation tools (e.g., SHAP values).
 - **Higher computational cost** and risk of **overfitting**.
@@ -111,9 +120,11 @@ In a **regulated financial context**, **interpretability often outweighs margina
 ## 2️⃣ Exploratory Data Analysis (EDA)
 
 #### Objective
+
 Perform an exploratory analysis of the Xente dataset (`data/raw/data.csv`) to understand its structure, distributions, correlations, missing values, and outliers, providing insights for feature engineering.
 
 #### Implementation
+
 - **Notebook**: `notebooks/1.0-eda.ipynb`
   - Loads the dataset with 95,662 rows and 16 columns.
   - Analyzes data types (11 object, 4 int64, 1 float64) and confirms no missing values.
@@ -121,20 +132,22 @@ Perform an exploratory analysis of the Xente dataset (`data/raw/data.csv`) to un
   - Visualizes distributions (highly skewed `Amount` and `Value`), box plots (significant outliers), and categorical frequencies (`ProductCategory`, `ChannelId`).
   - Calculates correlations: `Amount`-`Value` (0.99), `Amount`-`FraudResult` (0.56).
 - **Key Insights**:
-    1. **Highly Skewed Numerical Features with Negative Values**: `Amount` and `Value` are right-skewed with negatives (e.g., -1M), suggesting log-transformation after handling debits/credits.
-    2. **Dominant Product Categories**: “financial_services” and “airtime” dominate, recommending one-hot encoding with rare category grouping.
-    3. **No Missing Data**: All rows are complete, eliminating imputation needs.
-    4. **Complementary but Highly Correlated Amount and Value**: Correlation of 0.99, with `Value` as absolute size and `Amount` including direction; derive debit/credit flags.
-    5. **Significant Outliers**: Extremes from -1M to 9.88M, suggesting capping at 1.5× IQR.
+  1. **Highly Skewed Numerical Features with Negative Values**: `Amount` and `Value` are right-skewed with negatives (e.g., -1M), suggesting log-transformation after handling debits/credits.
+  2. **Dominant Product Categories**: “financial_services” and “airtime” dominate, recommending one-hot encoding with rare category grouping.
+  3. **No Missing Data**: All rows are complete, eliminating imputation needs.
+  4. **Complementary but Highly Correlated Amount and Value**: Correlation of 0.99, with `Value` as absolute size and `Amount` including direction; derive debit/credit flags.
+  5. **Significant Outliers**: Extremes from -1M to 9.88M, suggesting capping at 1.5× IQR.
 
 ---
 
 ## 3️⃣ Feature Engineering
 
 #### Objective
+
 Build a robust, automated, and reproducible data processing script to transform raw data into a model-ready format using an OOP design.
 
 #### Implementation
+
 - **Script**: `src/data_processing.py`
   - Uses a `DataProcessor` class with `sklearn.pipeline.Pipeline` to chain transformations.
   - **Aggregate Features**:
@@ -155,11 +168,13 @@ Build a robust, automated, and reproducible data processing script to transform 
 ## 4️⃣ Proxy Target Variable Engineering
 
 ### 📝 Description
+
 Since no pre-existing `"credit risk"` column exists in the dataset, a **proxy target variable** `is_high_risk` was engineered in `src/target_engineering.py` to identify **disengaged customers** as high-risk proxies. The process included:
 
 ---
 
 ### 📊 RFM Metrics
+
 - **Recency**: Days since the last transaction (calculated using snapshot date **June 30, 2025**).
 - **Frequency**: Total number of transactions per `CustomerId`.
 - **Monetary**: Total transaction value per `CustomerId`.
@@ -169,6 +184,7 @@ These were derived from the raw data using groupby-aggregation.
 ---
 
 ### 📈 Clustering
+
 - Applied **K-Means clustering** on the **scaled RFM features**
 - Parameters: `n_clusters=3`, `random_state=42`
 - Cluster centers were analyzed to segment customers into behavioral groups.
@@ -176,6 +192,7 @@ These were derived from the raw data using groupby-aggregation.
 ---
 
 ### 🚨 High-Risk Label Assignment
+
 - Calculated an **engagement score** using:
   `engagement = Frequency + |Monetary|`
 - The cluster with the **lowest engagement** (i.e., high Recency, low Frequency, low Monetary) was labeled as **high risk**.
@@ -186,6 +203,7 @@ These were derived from the raw data using groupby-aggregation.
 ---
 
 ### 🔗 Integration
+
 - Merged `is_high_risk` back into the original processed dataset using `CustomerId`
 - Saved the updated dataset as:
   `data/processed/processed_data_with_target.csv`
@@ -193,6 +211,7 @@ These were derived from the raw data using groupby-aggregation.
 ---
 
 ### 📁 Output
+
 - Final dataset includes:
   - All **55 features** from Task 3
   - Plus the **new binary target column**: `is_high_risk`
@@ -208,11 +227,13 @@ This task focuses on developing a structured model training process, including e
 ### 🔧 Implementation Details
 
 #### 📦 Dependencies
+
 - Added `mlflow` and `pytest` to `requirements.txt` to support:
   - Experiment tracking
   - Unit testing
 
 #### 📊 Data Preparation
+
 - Used `data/processed/processed_data_with_target.csv`
 - Dataset was split into **training (80%)** and **testing (20%)** sets.
 - Dropped non-numeric columns:
@@ -224,10 +245,12 @@ This task focuses on developing a structured model training process, including e
 ### 🤖 Model Selection and Training
 
 #### Models Trained:
+
 - Logistic Regression
 - Random Forest
 
 #### ⚙️ Hyperparameter Tuning:
+
 Used **GridSearchCV** with 5-fold cross-validation, optimizing for **F1 score**.
 
 - **Logistic Regression**:
@@ -243,6 +266,7 @@ Used **GridSearchCV** with 5-fold cross-validation, optimizing for **F1 score**.
 ### 📈 Model Evaluation
 
 **Metrics Tracked**:
+
 - Accuracy
 - Precision
 - Recall
@@ -250,6 +274,7 @@ Used **GridSearchCV** with 5-fold cross-validation, optimizing for **F1 score**.
 - ROC-AUC
 
 #### 🔹 Logistic Regression Results:
+
 - Accuracy: **0.9231**
 - Precision: **0.6876**
 - Recall: **0.4787**
@@ -257,6 +282,7 @@ Used **GridSearchCV** with 5-fold cross-validation, optimizing for **F1 score**.
 - ROC-AUC: **0.9363**
 
 #### 🔹 Random Forest Results:
+
 - Accuracy: **0.9900**
 - Precision: **0.9611**
 - Recall: **0.9422**
@@ -266,16 +292,19 @@ Used **GridSearchCV** with 5-fold cross-validation, optimizing for **F1 score**.
 ---
 
 ### 🧪 Experiment Tracking with MLflow
+
 - Parameters, metrics, and models were logged via **MLflow**.
 - Tracking URI set to: [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 #### ✅ Model Registration:
+
 - The best-performing model (Random Forest with F1 = 0.9516) was registered as:
   - **Version 2** of `"Credit_Risk_Model"` in the **MLflow Model Registry**
 
 ---
 
 ### ✅ Unit Testing
+
 - Added tests in `tests/test_data_processing.py`
 - Tested the `validate_time_range` helper function in `src/data_processing.py`
 - Ensures correct time feature extraction and input validation
@@ -285,23 +314,28 @@ Used **GridSearchCV** with 5-fold cross-validation, optimizing for **F1 score**.
 ### ▶️ How to Run
 
 #### 📥 Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 #### 🚀 Start MLflow Tracking UI
+
 ```bash
 mlflow ui
 ```
+
 - Run in a separate terminal
 - Accessible at: [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 #### 🤖 Train Models
+
 ```bash
 python src/train.py
 ```
 
 #### 🧪 Run Tests
+
 ```bash
 pytest tests/test_data_processing.py
 ```
@@ -309,6 +343,7 @@ pytest tests/test_data_processing.py
 ---
 
 ### 📌 Results Summary
+
 - **Random Forest** model significantly outperformed Logistic Regression.
 - Achieved **F1 score of 0.9516** and **ROC-AUC of 0.9984**
 - All experiments are **tracked in MLflow**, enabling reproducibility and versioning.
@@ -325,23 +360,28 @@ This task documents the development and deployment of a **Credit Risk Prediction
 ### 🔧 Implementation Details
 
 #### 📦 Dependencies
+
 - FastAPI, Docker, MLflow, and scikit-learn listed in `requirements.txt` for API development, containerization, and model management.
 
 #### 🤖 Model
+
 - **Random Forest Classifier** (version 4 of `Credit_Risk_Model`) registered in MLflow.
 - Loaded using MLflow’s PyFunc flavor for flexible predictions.
 
 #### 🌐 API Framework
+
 - Built with **FastAPI** for high-performance REST endpoints.
 - **Endpoint**: `/predict` (POST) returns risk probability and binary classification (`is_high_risk`).
 
 #### 📦 Deployment
+
 - Containerized with **Docker** for consistent deployment across environments.
 - Configured with `network_mode: host` to connect to the MLflow server.
 
 ---
 
 ### ✨ Features
+
 - 🛠️ **Model Training & Registration**: Trains and registers a credit risk model using scikit-learn and MLflow.
 - 🌐 **REST API**: Serves predictions via a fast and scalable REST endpoint.
 - 📦 **Dockerized Deployment**: Ensures consistent deployment with Docker.
@@ -350,6 +390,7 @@ This task documents the development and deployment of a **Credit Risk Prediction
 ---
 
 ### 📋 Prerequisites
+
 - **Python 3.10**: Required for running the application.
 - **Docker**: Install Docker and Docker Compose for containerization.
 - **MLflow**: Install via `pip install mlflow` and run the tracking server.
@@ -360,12 +401,14 @@ This task documents the development and deployment of a **Credit Risk Prediction
 ### 🛠️ Installation
 
 #### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/smucav/credit-risk-mlops.git
 cd credit-risk-mlops
 ```
 
 #### 2. Set Up the Virtual Environment
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -373,25 +416,34 @@ pip install -r requirements.txt
 ```
 
 #### 3. Start the MLflow Tracking Server
+
 Run the MLflow server on your host machine:
+
 ```bash
 mlflow server --host 0.0.0.0 --port 5000
 ```
-📍 Access the MLflow UI at [http://127.0.0.1:5000](http://127.0.0.1:5000).  
-*Ensure the server is running before starting the API.*
+
+📍 Access the MLflow UI at [http://127.0.0.1:5000](http://127.0.0.1:5000).
+_Ensure the server is running before starting the API._
 
 #### 4. Train and Register the Model
+
 Run the training script to generate and register the model:
+
 ```bash
 python src/train.py
 ```
+
 ✅ This registers version 4 of `Credit_Risk_Model` in MLflow.
 
 #### 5. Build and Run the Docker Container
+
 Use Docker Compose to build and start the API:
+
 ```bash
 sudo docker-compose up --build
 ```
+
 🌐 The API will be available at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 ---
@@ -399,12 +451,15 @@ sudo docker-compose up --build
 ### 🚀 Usage
 
 #### Test the Prediction Endpoint
+
 Send a POST request with sample data (`sample.json`) using `curl`:
+
 ```bash
 curl -X POST "http://127.0.0.1:8000/predict" -H "Content-Type: application/json" -d @sample.json
 ```
 
 **Expected Output**:
+
 ```json
 {
   "risk_probability": 0.025,
@@ -413,6 +468,7 @@ curl -X POST "http://127.0.0.1:8000/predict" -H "Content-Type: application/json"
 ```
 
 **Sample JSON (`sample.json`)**:
+
 ```json
 {
   "num__Amount": -0.046371,
@@ -428,44 +484,3 @@ curl -X POST "http://127.0.0.1:8000/predict" -H "Content-Type: application/json"
   "cat__TransactionType_3": 0
 }
 ```
-
-## 📂 Project Structure (Task 6)
-
-* Dockerfile: Defines the Docker image for the API.
-* docker-compose.yml: Configures the Docker container with network_mode: host for MLflow server connectivity.
-* src/api/main.py: FastAPI application that loads the MLflow model and serves the /predict endpoint.
-* src/api/pydantic_models.py: Pydantic models for input (CustomerData) and output (PredictionResponse).
-* src/train.py: Script to train, evaluate, and register the model with MLflow.
-* requirements.txt: Lists Python dependencies.
-* sample.json: Example input data for testing.
-
-## 🛠️ Model Training Workflow
-The model training process is managed by `src/train.py`, which automates the following steps:
-
-* Data Loading: Reads data/processed/processed_data_with_target.csv and imputes missing agg__StdTransactionAmount values with 0.
-* Feature Preparation: Drops non-numeric columns (e.g., remainder__TransactionId) and scales features using StandardScaler.
-* Model Training: Trains Logistic Regression and Random Forest models with GridSearchCV, optimizing for F1 score. Hyperparameters include C [0.01, 0.1, 1.0, 10.0] for Logistic Regression and n_estimators [100, 200], max_depth [10, 20, None], min_samples_split [2, 5] for Random Forest.
-* Evaluation: Logs metrics (Accuracy, Precision, Recall, F1, ROC-AUC) to MLflow, with Random Forest achieving F1 0.9516 and ROC-AUC 0.9984.
-* Registration: Registers the best model (Random Forest, version 4) in the MLflow Model Registry for deployment.
-
-
-Tracking: All experiments are logged at http://127.0.0.1:5000 using MLflow, ensuring reproducibility.
-
-
-#### Stop the Container
-```bash
-sudo docker-compose down
-```
-
----
-
-### 📂 Project Structure (Task 6)
-- **`Dockerfile`**: Defines the Docker image for the API.
-- **`docker-compose.yml`**: Configures the Docker container with `network_mode: host` for MLflow server connectivity.
-- **`src/api/main.py`**: FastAPI application that loads the MLflow model and serves the `/predict` endpoint.
-- **`src/api/pydantic_models.py`**: Pydantic models for input (`CustomerData`) and output (`PredictionResponse`).
-- **`src/train.py`**: Script to train, evaluate, and register the model with MLflow.
-- **`requirements.txt`**: Lists Python dependencies.
-- **`sample.json`**: Example input data for testing.
-
----
